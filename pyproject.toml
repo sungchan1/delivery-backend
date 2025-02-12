@@ -3,7 +3,9 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
 [project]
-requires-python = "3.11"
+name = "yorigin"
+requires-python = "^3.11"
+version = "0.1.0"
 
 [tool.black]
 line-length = 120
@@ -32,7 +34,7 @@ exclude = "fabfile"
 ignore_missing_imports = true
 implicit_reexport = true
 plugins = "pydantic.mypy"
-python_version = "3.11"
+python_version = "^3.11"
 show_error_codes = true
 strict = true
 
