@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any, Coroutine
 
 from app.entities.category.category_codes import CategoryCode
 from app.entities.collections.geo_json import GeoJsonPoint
@@ -16,7 +17,7 @@ async def get_distinct_home_categories(longitude: float, latitude: float) -> tup
 
 async def get_home_categories_one_by_one(longitude: float, latitude: float) -> tuple[CategoryCode, ...]:
     li = [
-        ShopCollection.exists_by_category_and_point_intersects(code, GeoJsonPoint(coordinates=[latitude, longitude]))
+        ShopCollection.exists_by_category_and_point_intersects(code, GeoJsonPoint(coordinates=[longitude, latitude]))
         for code in CategoryCode
     ]
     return tuple(code for code, exists in zip(CategoryCode, await asyncio.gather(*li)) if exists)
