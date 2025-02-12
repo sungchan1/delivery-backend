@@ -51,7 +51,7 @@ async def test_api_get_categories_distinct() -> None:
 
     # Then
     assert response.status_code == status.HTTP_200_OK
-    assert [elem for elem in response.json()["categories"]] == [CategoryCode.CHICKEN.value]
+    assert [elem["code"] for elem in response.json()["categories"]] == [CategoryCode.CHICKEN.value]
 
 
 async def test_api_get_categories_one_by_one_latitude_too_big() -> None:
