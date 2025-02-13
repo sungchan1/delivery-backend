@@ -75,3 +75,19 @@ class CategoryPointCollection:
                 {"point": {"$geoWithin": {"$geometry": asdict(polygon)}}, "codes": {"$ne": code.value}}
             ).to_list(length=None)
         )
+
+    @classmethod
+    async def get_all_point_within_polygon_and_code(
+        cls, polygon: GeoJsonPolygon, code: CategoryCode
+    ) -> tuple[CategoryPointDocument, ...]:
+        return tuple(
+            CategoryPointDocument(
+                cache_key=result["cache_key"],
+                codes=tuple(CategoryCode(code) for code in result["codes"]),
+                point=GeoJsonPoint(coordinates=result["point"]["coordinates"]),
+                _id=result["_id"],
+            )
+            for result in await cls._collection.find(
+                {"point": {"$geoWithin": {"$geometry": asdict(polygon)}}, "codes": code.value},
+            ).to_list(length=None)
+        )

@@ -1,7 +1,8 @@
 from dataclasses import asdict
-from typing import Any
+from typing import Any, cast
 
 import pymongo
+from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 from app.entities.category.category_codes import CategoryCode
@@ -85,3 +86,21 @@ class ShopCollection:
         )
 
         return bool(cnt)
+
+    @classmethod
+    async def find_by_id(cls, object_id: ObjectId) -> ShopDocument | None:
+        result = await cls._collection.find_one(
+            {
+                "_id": object_id,
+            }
+        )
+        return cls._parse(result) if result else None
+
+    @classmethod
+    async def delete_by_id(cls, object_id: ObjectId) -> int:
+        result = await cls._collection.delete_one(
+            {
+                "_id": object_id,
+            }
+        )
+        return cast(int, result.deleted_count)

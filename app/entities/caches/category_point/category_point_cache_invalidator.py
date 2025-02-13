@@ -1,6 +1,7 @@
 import asyncio
 from abc import ABC, abstractmethod
 
+from app.entities.collections import ShopCollection
 from app.entities.collections.category_point.category_point_collection import (
     CategoryPointCollection,
 )
@@ -49,3 +50,36 @@ class ShopCreationCategoryPointCacheInvalidator(CategoryPointCacheInvalidator):
                 for code in self._shop.category_codes
             )
         )
+
+
+class ShopDeletionCategoryPointCacheInvalidator(CategoryPointCacheInvalidator):
+    async def invalidate(self) -> None:
+        points_to_delete = await self._get_points_to_delete()
+        for point in points_to_delete:
+            await self._delete_cache(point)
+
+    async def _get_points_to_delete(self) -> list[CategoryPointDocument]:
+        """
+        1. 배달구역내에 특정 카테고리가 "있는" 모든 캐시를 가져옵니다.
+        2. 각 캐시별로 정말 해당 카테고리의 가게가 하나도 남지 않았는지 확인합니다.
+        3. 만약 하나도 남지 않았다면, 결과 리스트에 담아서 리턴합니다. 이후 캐시가 삭제되게 됩니다.
+        """
+        list_of_point_tuple = await asyncio.gather(
+            *(
+                CategoryPointCollection.get_all_point_within_polygon_and_code(area.poly, code)
+                for area in self._shop.delivery_areas
+                for code in self._shop.category_codes
+            )
+        )
+        id_map = set()
+        result = []
+        for tp, code in zip(
+            list_of_point_tuple, (code for _ in self._shop.delivery_areas for code in self._shop.category_codes)
+        ):
+            for point in tp:
+                if point.id not in id_map and not await ShopCollection.exists_by_category_and_point_intersects(
+                    code, point.point
+                ):
+                    result.append(point)
+                    id_map.add(point.id)
+        return result
