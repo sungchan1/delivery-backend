@@ -7,8 +7,8 @@ from app.dtos.category.category_response import CategoryResponse
 from app.dtos.category.coordinates_request import CoordinatesRequest
 from app.services.category_service import (
     get_distinct_home_categories,
-    get_home_categories_one_by_one,
     get_home_categories_cached,
+    get_home_categories_one_by_one,
 )
 
 router = APIRouter(prefix="/v1/home_categories", tags=["Home Category"], redirect_slashes=False)
